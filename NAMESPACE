@@ -1,0 +1,5 @@
+export(GetDataSotkanet)
+export(SotkanetIndicators)
+export(SotkanetRegions)
+import(ggplot2)
+import(rjson)
