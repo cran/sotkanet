@@ -1,25 +1,5 @@
-# This file is a part of rOpenGOv (http://ropengov.github.com/sotkanet/)
-
-# Contributed by Einari Happonen and Opasnet:
-# http://fi.opasnet.org/fi/Etusivu
-# Copyright (C) 2013-2014 Einari Happonen and Leo Lahti 
-# <ropengov.github.com>. All rights reserved.
-
-# This program is open source software; you can redistribute it and/or modify 
-# it under the terms of the FreeBSD License (keep this notice): 
-# http://en.wikipedia.org/wiki/BSD_licenses
-
-# This program is distributed in the hope that it will be useful, 
-# but WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-#' @import ggplot2
-#' @import rjson
-NULL
-
 #' Description:
-#' SotkanetData retrieves Sotkanet data from
-#' http://www.sotkanet.fi/rest/1.0/data/csv?
+#' SotkanetData retrieves Sotkanet data 
 #' according to the query arguments.
 #'
 #' Arguments:
@@ -35,11 +15,18 @@ NULL
 #' @author Einari Happonen / Opasnet / Louhos. Maintainer: Louhos/Opasnet \email{louhos@@googlegroups.com}
 #' @examples # 
 #' @keywords utilities
-
 SotkanetData <- function(indicator, years, genders)
 {
+
+  #base.url <- base_url()
+  #url <- paste(base.url, 'data/csv?', sep = "")
+  # Here the older url is in use for some reason:
   url <- 'http://www.sotkanet.fi/rest/1.0/data/csv?'
-  url <- paste(url, 'indicator=',indicator, '&years=', paste(years, collapse='&years='), '&genders=', paste(genders, collapse='&genders='), sep='')
+
+  url <- paste(url, 'indicator=',indicator, '&years=', 
+      	 	    paste(years, collapse='&years='), 
+		    '&genders=', paste(genders, 
+		    collapse='&genders='), sep='')
   return(sotkanet.csv_query(url))
 }
 
@@ -53,17 +40,20 @@ SotkanetData <- function(indicator, years, genders)
 #'   @param years vector of years c(2010, 2012, ... )
 #'   @param genders vector of genders ('male' | 'female' | 'total')
 #'   @param regions return selected regions only
-#'   @param region.category return selected regions category (for options, see: unique(SotkanetRegions(type = "table")$region.category)); "ALUEHALLINTOVIRASTO, "ERVA", "EURALUEET", "EUROOPPA", "KUNTA", "MAA", "MAAKUNTA", "NUTS1", "POHJOISMAAT", "SAIRAANHOITOPIIRI", "SEUTUKUNTA", "SUURALUE"   
+#'   @param region.category return selected regions category (for options, see:
+#'          unique(SotkanetRegions(type = "table")$region.category)); 
+#'	    "ALUEHALLINTOVIRASTO, "ERVA", "EURALUEET", "EUROOPPA", "KUNTA", 
+#'	    "MAA", "MAAKUNTA", "NUTS1", "POHJOISMAAT", "SAIRAANHOITOPIIRI", 
+#'	    "SEUTUKUNTA", "SUURALUE"   
 #'
 #' Returns:
 #'   @return sotkanet data table
 #'
 #' @references
 #' See citation("sotkanet") 
-#' @author Einari Happonen / Opasnet / Louhos. Maintainer: Louhos/Opasnet \email{louhos@@googlegroups.com}
+#' @author Einari Happonen. Maintainer: Louhos/Opasnet \email{louhos@@googlegroups.com}
 #' @examples # 
 #' @keywords utilities
-
 GetDataSotkanetSingleIndicator <- function (indicator, years = 1990:2013, genders = "total", regions = NULL, region.category = NULL) {
 
   # FIXME: is it possible to specify already in query which regions we select
@@ -111,6 +101,7 @@ GetDataSotkanetSingleIndicator <- function (indicator, years = 1990:2013, gender
 #' Returns:
 #'   @return sotkanet json query
 #'
+#' @importFrom RCurl url.exists
 #' @references
 #' See citation("sotkanet") 
 #' @author Einari Happonen / Opasnet. Maintainer: Louhos/Opasnet \email{louhos@@googlegroups.com}
@@ -118,16 +109,22 @@ GetDataSotkanetSingleIndicator <- function (indicator, years = 1990:2013, gender
 
 sotkanet.json_query <- function(url)
 {
-        response <- rjson::fromJSON(
-                        paste(
-                                        readLines(url),
-                                        collapse = ""
-                        )
-        )
 
-        if (is.null(response)) stop("Sotkanet server is not responding! Unable to query!")
+  # Check that the URL exists
+  if (!url.exists(url)) {
+    warning(paste("Sotkanet URL", url, "does not exist - returning NULL!"))
+    return(NULL)
+  }
 
-        return(response)
+  # Retrieve the data
+  response <- rjson::fromJSON(
+    paste(readLines(url, warn = FALSE), collapse = "")
+  )
+
+  if (is.null(response)) 
+    stop("Sotkanet server is not responding! Unable to query!")
+
+  return(response)
 }
 
 
@@ -142,18 +139,28 @@ sotkanet.json_query <- function(url)
 #'
 #' @references
 #' See citation("sotkanet") 
-#' @author Einari Happonen / Opasnet. Maintainer: Louhos/Opasnet \email{louhos@@googlegroups.com}
+#' @author Einari Happonen. Maintainer: Louhos/Opasnet \email{louhos@@googlegroups.com}
 #' @keywords utilities
 
 sotkanet.csv_query <- function(url)
 {
-        csv <- readLines(url)
 
-        if (is.null(csv)) {
-	  stop("Sotkanet server is not responding! Unable to query!")
-	}
+  # Check that the URL exists
+  if (!url.exists(url)) {
+    warning(paste("Sotkanet URL", url, "does not exist - returning NULL!"))
+    return(NULL)
+  }
 
-        return(read.table(file = textConnection(csv), header = TRUE, sep=';'))
+  csv <- readLines(url, warn = FALSE)
+
+  if (is.null(csv)) {
+    stop("Sotkanet server is not responding! Unable to query!")
+  }
+
+  tab <- read.table(file = textConnection(csv), header = TRUE, sep = ';')
+
+  return(tab)
+
 }
 
 
@@ -198,3 +205,4 @@ SotkanetCollect <- function(x, name) {
 
   return(out)
 }
+
