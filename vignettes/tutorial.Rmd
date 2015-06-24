@@ -11,27 +11,25 @@ This is the [sotkanet](https://github.com/rOpenGov/sotkanet) R package to access
 
 ### Installation
 
-Release version for general users:
+Release version:
 
 ```{r install, eval=FALSE}
 install.packages("sotkanet")
 library(sotkanet)
 ```
 
-Development version for developers:
+Development version (for the adventurous ones):
 
 ```{r install2, eval=FALSE}
-install.packages("devtools")
 library(devtools)
 install_github("ropengov/sotkanet")
-library(sotkanet)
 ```
 
 ### Listing available indicators
 
 List available Sotkanet indicators and print as a table:
 
-```{r sotkanetIndicators, warning=FALSE, message=FALSE}
+```{r sotkanetIndicators, warning=FALSE, message=FALSE, eval=FALSE}
 library(sotkanet) 
 sotkanet.indicators <- SotkanetIndicators(type = "table")
 
@@ -41,9 +39,9 @@ kable(head(sotkanet.indicators))
 
 List geographical regions with available indicators:
 
-```{r sotkanetRegions, warning=FALSE, message=FALSE}
+```{r sotkanetRegions, warning=FALSE, message=FALSE, eval=FALSE}
 sotkanet.regions <- SotkanetRegions(type = "table")
-knitr::kable(head(sotkanet.regions))
+kable(head(sotkanet.regions))
 ```
 
 
@@ -51,62 +49,15 @@ knitr::kable(head(sotkanet.regions))
 
 Get the [indicator 10013](http://uusi.sotkanet.fi/portal/page/portal/etusivu/hakusivu/metadata?type=I&indicator=10013) from Finland (Suomi) for 1990-2012 (Eurostat employment statistics youth unemployment), and plot a graph:
 
-```{r sotkanetData, warning=FALSE, message=FALSE}
+```{r sotkanetData, warning=FALSE, message=FALSE, eval=FALSE}
 # Get indicator data
 dat <- GetDataSotkanet(indicators = 10013, years = 1990:2012, 
        		       genders = c('female', 'male', 'total'), 
-		       region.category = "EUROOPPA", region = "Suomi")
+		       region.category = "EUROOPPA", regions = "Suomi")
 
 # Investigate the first lines in the data
-knitr::kable(head(dat))
+kable(head(dat))
 ```
-
-Visualize the data:
-
-```{r sotkanetDataVisu, warning=FALSE, message=FALSE}
-# Pick indicator name
-indicator.name <- as.character(unique(dat$indicator.title.fi))
-indicator.source <- as.character(unique(dat$indicator.organization.title.fi))
-
-# Visualize
-library(ggplot2)
-theme_set(theme_bw(20)); 
-p <- ggplot(dat, aes(x = year, y = primary.value, group = gender, color = gender)) 
-p <- p + geom_line() + ggtitle(paste(indicator.name, indicator.source, sep = " / ")) 
-p <- p + xlab("Year") + ylab("Value") 
-p <- p + theme(title = element_text(size = 10))
-p <- p + theme(axis.title.x = element_text(size = 20))
-p <- p + theme(axis.title.y = element_text(size = 20))
-p <- p + theme(legend.title = element_text(size = 15))
-print(p)
-```
-
-
-### Effect of municipality size
-
-Smaller municipalities have more random variation.
-
-```{r sotkanetVisu3, warning=FALSE, message=FALSE}
-selected.inds <- c(127, 178)
-dat <- GetDataSotkanet(indicators = selected.inds, 
-       			years = 2011, genders = c('total'))
-# Pick necessary fields and remove duplicates
-datf <- dat[, c("region.title.fi", "indicator.title.fi", "primary.value")]
-datf <- datf[!duplicated(datf),]
-dw <- reshape(datf, idvar = "region.title.fi", 
-      		    timevar = "indicator.title.fi", direction = "wide")
-names(dw) <- c("Municipality", "Population", "Migration")
-p <- ggplot(dw, aes(x = log10(Population), y = Migration)) 
-p <- p + geom_point(size = 3)
-p <- p + ggtitle("Migration vs. population size") 
-p <- p + theme(title = element_text(size = 15))
-p <- p + theme(axis.title.x = element_text(size = 20))
-p <- p + theme(axis.title.y = element_text(size = 20))
-p <- p + theme(legend.title = element_text(size = 15))
-print(p)
-```
-
-
 
 ### Fetch all SOTKAnet indicators
 
@@ -129,9 +80,63 @@ for (ind in setdiff(sotkanet.indicators$indicator, probematic.indicators)) {
 dat <- do.call("rbind", datlist)
 ```
 
+## Visualization
+
+Download and visualize time series:
+
+```{r sotkanetDataVisu, warning=FALSE, message=FALSE, fig.width=10, figh.height=7, eval=FALSE}
+# Pick indicator name
+indicator.name <- as.character(unique(dat$indicator.title.fi))
+indicator.source <- as.character(unique(dat$indicator.organization.title.fi))
+
+# Visualize
+library(ggplot2)
+theme_set(theme_bw(20)); 
+p <- ggplot(dat, aes(x = year, y = primary.value, group = gender, color = gender)) 
+p <- p + geom_line() + ggtitle(paste(indicator.name, indicator.source, sep = " / ")) 
+p <- p + xlab("Year") + ylab("Value") 
+p <- p + theme(title = element_text(size = 10))
+p <- p + theme(axis.title.x = element_text(size = 20))
+p <- p + theme(axis.title.y = element_text(size = 20))
+p <- p + theme(legend.title = element_text(size = 15))
+print(p)
+```
+
+
+Investigate the effect of municipality size on demographic
+variation. Smaller municipalities show more random variation as
+expected by statistical arguments:
+
+```{r sotkanetVisu3, warning=FALSE, message=FALSE, eval=FALSE}
+selected.inds <- c(127, 178)
+dat <- GetDataSotkanet(indicators = selected.inds, 
+       			years = 2011, genders = c('total'))
+# Pick necessary fields and remove duplicates
+datf <- dat[, c("region.title.fi", "indicator.title.fi", "primary.value")]
+datf <- datf[!duplicated(datf),]
+dw <- reshape(datf, idvar = "region.title.fi", 
+      		    timevar = "indicator.title.fi", direction = "wide")
+names(dw) <- c("Municipality", "Population", "Migration")
+p <- ggplot(dw, aes(x = log10(Population), y = Migration)) 
+p <- p + geom_point(size = 3)
+p <- p + ggtitle("Migration vs. population size") 
+p <- p + theme(title = element_text(size = 15))
+p <- p + theme(axis.title.x = element_text(size = 20))
+p <- p + theme(axis.title.y = element_text(size = 20))
+p <- p + theme(legend.title = element_text(size = 15))
+print(p)
+```
+
+## Further examples
+
 For further usage examples, see
 [Louhos-blog](http://louhos.wordpress.com), and
-[takomo](https://github.com/louhos/takomo/tree/master/Sotkanet).
+[takomo](https://github.com/louhos/takomo/tree/master/Sotkanet). In
+particular the following blog posts are using the package:
+
+ * [Kuntatiedon visualisointi](http://louhos.github.io/news/2015/06/06/kuntakartat/)
+ * [Helsinki Region Infoshare-blogi](http://www.hri.fi/fi/ajankohtaista/sotkanet-indikaattoripankki-mukaan-sorvi-tyokalupakkiin/)
+
 
 
 # Licensing and Citations
