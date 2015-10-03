@@ -1,11 +1,11 @@
-87062df035aa8eb4e4a801caa0240733 *DESCRIPTION
+288fd9f87b3bf7885b2f3e66c1ec9599 *DESCRIPTION
 b76b3a759fe3766d3794d51550e00401 *LICENSE
-711b1404a195f7fdab6b8bb8d314413a *NAMESPACE
+4b69f37e1beea4bd3ed1ba3e8ff0d7d6 *NAMESPACE
 c4b3048075fd745c2379377260e9c6dd *R/GetDataSotkanet.R
 fad0d6943639f1b8d6afb8a2da40b00d *R/SotkanetData.R
 2a76f69820536bd8c1941cf686f2605b *R/SotkanetIndicators.R
-4def3e7c9432fd91caca976a97c1d7a6 *R/base_url.R
-b97395c91bf7697ca9a0b51d1a0a286f *R/csv.R
+0b98b6aaf4f7bd7281ea891ee24921f4 *R/base_url.R
+58f59cb4db983033a6dfd5c839863bab *R/csv.R
 b26613b552ee1286e5de084a2a28098e *R/firstlib.R
 929ac1009e2468f574dbeaa805d9c870 *R/internal.R
 e2f3b1449f41cff0594302575af5fa50 *R/json.R
@@ -14,9 +14,9 @@ e2f3b1449f41cff0594302575af5fa50 *R/json.R
 57071892193401620f47e43a1e3e3485 *README.md
 03f2467011fe1707b12ab549121726fc *build/vignette.rds
 0587209713239eb464898779689574be *inst/CITATION
-b91cb2954e959e97c8c8b90c91024f19 *inst/doc/tutorial.R
-339fb1c3ec54105c55c93f06af8cb0d5 *inst/doc/tutorial.Rmd
-f20acef95841978b6a136ad10e7d39db *inst/doc/tutorial.html
+96c3a4b4e04817af0311041a7e55eadf *inst/doc/tutorial.R
+00a873f5a65cf8a54cf0a304104ecd57 *inst/doc/tutorial.Rmd
+7ffc5e29b3ed88e8ac553d9cda46f77b *inst/doc/tutorial.html
 75ac6227eb53012646fb53e8f17da4ec *man/GetDataSotkanet.Rd
 524bd848d9ecb9d700e539e736c01d66 *man/GetDataSotkanetSingleIndicator.Rd
 b4a3e60a5391248c8a3561dbc6193284 *man/SotkanetCollect.Rd
@@ -25,6 +25,6 @@ dccc4520dae527b263876a5900ebf4c1 *man/SotkanetData.Rd
 39318ba4cbb73941ca6832bf3194cfdd *man/SotkanetRegions.Rd
 5b5f564fea3777fc4e250ac4a0feae9f *man/base_url.Rd
 ed6642abd648dde797bf48d6c6bc55f5 *man/sotkanet-package.Rd
-4e397b711de969620ccdff52cdf875a0 *man/sotkanet.csv_query.Rd
+9b55111bdbd4ab5fdce1e790a2d97fc2 *man/sotkanet.csv_query.Rd
 3da14a5c627e10862ee5a20ac8441bf0 *man/sotkanet.json_query.Rd
-339fb1c3ec54105c55c93f06af8cb0d5 *vignettes/tutorial.Rmd
+00a873f5a65cf8a54cf0a304104ecd57 *vignettes/tutorial.Rmd
