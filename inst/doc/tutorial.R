@@ -1,3 +1,7 @@
+## ---- echo = FALSE-------------------------------------------------------
+# HW preferred defaults for displaying code
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+
 ## ----install, eval=FALSE-------------------------------------------------
 #  install.packages("sotkanet")
 
@@ -5,12 +9,13 @@
 #  library(devtools)
 #  install_github("ropengov/sotkanet")
 
-## ----sotkanetIndicators, warning=FALSE, message=FALSE, eval=TRUE---------
-library(sotkanet) 
-sotkanet.indicators <- SotkanetIndicators(type = "table")
+## ----loadlib, warning=FALSE, message=FALSE, echo=FALSE, eval=TRUE--------
+library(sotkanet)
+library(knitr) 
 
-library(knitr)
-kable(head(sotkanet.indicators))
+## ----sotkanetIndicators, warning=FALSE, message=FALSE, eval=FALSE--------
+#  sotkanet.indicators <- SotkanetIndicators(type = "table")
+#  # kable(head(sotkanet.indicators))
 
 ## ----sotkanetRegions, warning=FALSE, message=FALSE, eval=TRUE------------
 sotkanet.regions <- SotkanetRegions(type = "table")
@@ -40,7 +45,7 @@ kable(head(dat))
 #  # for the full data set)
 #  dat <- do.call("rbind", datlist)
 
-## ----sotkanetDataVisu, warning=FALSE, message=FALSE, fig.width=10, figh.height=7, eval=TRUE----
+## ----sotkanetDataVisu, warning=FALSE, message=FALSE, fig.width=10, figh.height=5, eval=TRUE----
 # Pick indicator name
 indicator.name <- as.character(unique(dat$indicator.title.fi))
 indicator.source <- as.character(unique(dat$indicator.organization.title.fi))
@@ -57,7 +62,7 @@ p <- p + theme(axis.title.y = element_text(size = 20))
 p <- p + theme(legend.title = element_text(size = 15))
 print(p)
 
-## ----sotkanetVisu3, warning=FALSE, message=FALSE, eval=TRUE--------------
+## ----sotkanetVisu3, warning=FALSE, message=FALSE, eval=TRUE, fig.width=10, fig.height=5----
 selected.inds <- c(127, 178)
 dat <- GetDataSotkanet(indicators = selected.inds, 
        			years = 2011, genders = c('total'))
@@ -67,13 +72,13 @@ datf <- datf[!duplicated(datf),]
 dw <- reshape(datf, idvar = "region.title.fi", 
       		    timevar = "indicator.title.fi", direction = "wide")
 names(dw) <- c("Municipality", "Population", "Migration")
-p <- ggplot(dw, aes(x = log10(Population), y = Migration)) 
-p <- p + geom_point(size = 3)
-p <- p + ggtitle("Migration vs. population size") 
-p <- p + theme(title = element_text(size = 15))
-p <- p + theme(axis.title.x = element_text(size = 20))
-p <- p + theme(axis.title.y = element_text(size = 20))
-p <- p + theme(legend.title = element_text(size = 15))
+p <- ggplot(dw, aes(x = log10(Population), y = Migration)) +
+       geom_point(size = 3)
+       ggtitle("Migration vs. population size") 
+       theme(title = element_text(size = 15))
+       theme(axis.title.x = element_text(size = 20))
+       theme(axis.title.y = element_text(size = 20))
+       theme(legend.title = element_text(size = 15))
 print(p)
 
 ## ----citation, message=FALSE, eval=TRUE----------------------------------
