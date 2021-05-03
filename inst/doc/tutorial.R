@@ -1,42 +1,50 @@
-## ---- echo = FALSE-------------------------------------------------------
-# HW preferred defaults for displaying code
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+## ---- echo = FALSE------------------------------------------------------------
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 
-## ----install, eval=FALSE-------------------------------------------------
+## ----install, eval=FALSE------------------------------------------------------
 #  install.packages("sotkanet")
 
-## ----install2, eval=FALSE------------------------------------------------
+## ----install2, eval=FALSE-----------------------------------------------------
 #  library(devtools)
 #  install_github("ropengov/sotkanet")
 
-## ----loadlib, warning=FALSE, message=FALSE, echo=FALSE, eval=TRUE--------
+## ----loadlib, warning=FALSE, message=FALSE, echo=FALSE, eval=TRUE-------------
 library(sotkanet)
 library(knitr) 
+library(magrittr)
+library(kableExtra)
 
-## ----sotkanetIndicators, warning=FALSE, message=FALSE, eval=FALSE--------
+## ----sotkanetIndicators, warning=FALSE, message=FALSE, eval=FALSE-------------
 #  sotkanet.indicators <- SotkanetIndicators(type = "table")
 #  # kable(head(sotkanet.indicators))
 
-## ----sotkanetRegions, warning=FALSE, message=FALSE, eval=TRUE------------
+## ----sotkanetRegions, warning=FALSE, message=FALSE, eval=TRUE----
+options(width = 60)
 sotkanet.regions <- SotkanetRegions(type = "table")
 kable(head(sotkanet.regions))
 
-## ----sotkanetData, warning=FALSE, message=FALSE, eval=TRUE---------------
+## ----sotkanetData, warning=FALSE, message=FALSE, eval=TRUE----
 # Get indicator data
 dat <- GetDataSotkanet(indicators = 10013, years = 1990:2012, 
        		       genders = c('female', 'male', 'total'), 
 		       region.category = "EUROOPPA", regions = "Suomi")
 
 # Investigate the first lines in the data
-kable(head(dat))
+kable(head(dat)) %>% 
+  kable_styling() %>%
+  kableExtra::scroll_box(width = "100%")
 
-## ----sotkanetDataAll, warning=FALSE, message=FALSE, eval=FALSE-----------
+## ----sotkanetDataAll, warning=FALSE, message=FALSE, eval=FALSE----
 #  # These indicators have problems with R routines:
-#  probematic.indicators <- c(1575, 1743, 1826, 1861, 1882, 1924, 1952, 2000, 2001, 2033, 2050, 3386, 3443)
+#  problematic.indicators <- c(1575, 1743, 1826, 1861, 1882, 1924, 1952, 2000,
+#                              2001, 2033, 2050, 3386, 3443)
 #  
 #  # Get data for all indicators
 #  datlist <- list()
-#  for (ind in setdiff(sotkanet.indicators$indicator, probematic.indicators)) {
+#  for (ind in setdiff(sotkanet.indicators$indicator, problematic.indicators)) {
 #    datlist[[as.character(ind)]] <- GetDataSotkanet(indicators = ind,
 #    		years = 1990:2013, genders = c('female', 'male', 'total'))
 #  }
@@ -45,7 +53,7 @@ kable(head(dat))
 #  # for the full data set)
 #  dat <- do.call("rbind", datlist)
 
-## ----sotkanetDataVisu, warning=FALSE, message=FALSE, fig.width=10, figh.height=5, eval=TRUE----
+## ----sotkanetDataVisu, warning=FALSE, message=FALSE, fig.width=10, figh.height=5, eval=TRUE, out.width = "100%"----
 # Pick indicator name
 indicator.name <- as.character(unique(dat$indicator.title.fi))
 indicator.source <- as.character(unique(dat$indicator.organization.title.fi))
@@ -62,7 +70,7 @@ p <- p + theme(axis.title.y = element_text(size = 20))
 p <- p + theme(legend.title = element_text(size = 15))
 print(p)
 
-## ----sotkanetVisu3, warning=FALSE, message=FALSE, eval=TRUE, fig.width=10, fig.height=5----
+## ----sotkanetVisu3, warning=FALSE, message=FALSE, eval=TRUE, fig.width=10, fig.height=5, out.width = "100%"----
 selected.inds <- c(127, 178)
 dat <- GetDataSotkanet(indicators = selected.inds, 
        			years = 2011, genders = c('total'))
@@ -81,9 +89,9 @@ p <- ggplot(dw, aes(x = log10(Population), y = Migration)) +
        theme(legend.title = element_text(size = 15))
 print(p)
 
-## ----citation, message=FALSE, eval=TRUE----------------------------------
+## ----citation, message=FALSE, eval=TRUE-------------------
 citation("sotkanet")
 
-## ----sessioninfo, message=FALSE, warning=FALSE---------------------------
+## ----sessioninfo, message=FALSE, warning=FALSE------------
 sessionInfo()
 

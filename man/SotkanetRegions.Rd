@@ -16,10 +16,12 @@ sotkanet json query in selected format
 Retrieves sotkanet regions data.
 }
 \details{
-Data is fetched from \url{http://www.sotkanet.fi/rest/1.1/regions}.
+Data is fetched from \url{https://sotkanet.fi/rest/1.1/regions}.
 }
 \examples{
-\dontrun{sotkanet.regions <- SotkanetRegions(type = "table")}
+\dontrun{
+sotkanet.regions <- SotkanetRegions(type = "table")
+}
 }
 \references{
 See citation("sotkanet")
