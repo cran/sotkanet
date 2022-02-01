@@ -4,27 +4,37 @@
 \alias{SotkanetIndicators}
 \title{Sotkanet Indicators}
 \usage{
-SotkanetIndicators(id = NULL, type = "table")
+SotkanetIndicators(id = NULL, type = "table", user.agent = NULL)
 }
 \arguments{
-\item{id}{Dataset identifier}
+\item{id}{Dataset identifier. Default is NULL returning all}
 
-\item{type}{output format ("table" or "raw")}
+\item{type}{type output format, either 'table' (default) or 'raw'. 
+Default produces a truncated table with strictly defined columns that
+are useful in other functions. 'Raw' produces the full output which might
+be useful for exploratory purposes.}
+
+\item{user.agent}{"User agent" defined by the user. Default is NULL which
+will then use the package identifier "rOpenGov/sotkanet"}
 }
 \value{
-json query in selected output format
+data.frame (type = "table) or a list (type = "raw")
 }
 \description{
-Retrieve data for a specific data id.
-  \url{https://sotkanet.fi/rest/1.1/indicators}.
+Retrieve Sotkanet indicator metadata
+}
+\details{
+Data is fetched from \url{https://sotkanet.fi/rest/1.1/indicators}.
 }
 \examples{
-\dontrun{sotkanet.indicators <- SotkanetIndicators(type = "table")}
+\dontrun{
+sotkanet.indicators <- SotkanetIndicators(type = "table")
+}
 }
 \references{
 See citation("sotkanet")
 }
 \author{
-Leo Lahti \email{leo.lahti@iki.fi}
+Leo Lahti \email{leo.lahti@iki.fi}, Pyry Kantanen
 }
 \keyword{utilities}
