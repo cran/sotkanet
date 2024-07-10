@@ -9,21 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-NOT_CRAN <- identical(tolower(Sys.getenv("NOT_CRAN")), "true")
-eval_packages <- requireNamespace(c("kableExtra", "ggplot2"))
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  purl = NOT_CRAN,
-  eval = NOT_CRAN && eval_packages
-)
-```
 
 
-```{r eval = !eval_packages, echo = FALSE}
-message("Packages `kableExtra` and `ggplot2` required for building the vignette. Code chunks will not be evaluated.")
-```
+
+
 
 
 This [sotkanet](https://github.com/rOpenGov/sotkanet) R package provides access to data from the [Sotkanet portal](https://sotkanet.fi/sotkanet/en/index). Your [contributions](https://ropengov.org/community/) and [bug reports and other feedback](https://github.com/rOpenGov/sotkanet) are welcome.
@@ -39,20 +28,23 @@ The `sotkanet` R package enables access to the Sotkanet API using R facilitating
 
 To install latest release version from CRAN, use:
 
-```{r install, eval = FALSE}
+
+``` r
 install.packages("sotkanet")
 ```
 
 To install development version from GitHub, use:
 
-```{r install2, eval = FALSE}
+
+``` r
 library(remotes)
 remotes::install_github("ropengov/sotkanet")
 ```
 
 Test the installation by loading the package:
 
-```{r load, eval = FALSE}
+
+``` r
 library(sotkanet)
 ```
 
@@ -64,7 +56,8 @@ library(sotkanet)
 
 Load sotkanet and other packages used in the vignette.
 
-```{r libraries, warning = FALSE, message = FALSE}
+
+``` r
 library(sotkanet)
 library(kableExtra)
 library(ggplot2)
@@ -74,7 +67,8 @@ library(ggplot2)
 
 List available Sotkanet indicators using `sotkanet_indicators()`:
 
-```{r sotkanet_indicators, warning = FALSE}
+
+``` r
 # Using a preset list of indicators to avoid a large download
 indicators <- sotkanet_indicators(id = c(4, 5, 6, 127, 10012, 10027),
                                   type = "table", lang = "en")
@@ -83,7 +77,8 @@ kable(head(indicators))
 
 List geographical regions with available indicators using `sotkanet_regions()`:
 
-```{r sotkanet_regions, warning = FALSE}
+
+``` r
 # List of the first few regions
 regions <- sotkanet_regions(type = "table", lang = "en")
 kable(head(regions))
@@ -93,7 +88,8 @@ kable(head(regions))
 
 To download the data, we need to know the indicator for it. You can look for the right indicator using aforementioned `sotkanet_indicators()` or by browsing the [Sotkanet website](https://sotkanet.fi/sotkanet/en/index). For example, the indicator no. 10012 responds to the (EU) GPD per capita in Purchasing Power Standards (PPS) dataset. The data can be downloaded with `get_sotkanet()` function. If we want, for example, the GPD data from Finland for 2000-2010, the function call is:
 
-```{r get_sotkanet, warning = FALSE}
+
+``` r
 # Get the indicator data
 dat <- get_sotkanet(indicators = 10012, years = 2000:2010,
                     genders = c("total"), lang = "en", regions = "Finland")
@@ -108,7 +104,8 @@ The data can also be downloaded by using interactive function `sotkanet_interact
 
 Dataset citation can be printed for any indicator using the function `sotkanet_cite()`. The citation for the GPD data is:
 
-```{r, warning = FALSE, message = FALSE}
+
+``` r
 sotkanet_cite(10012, lang = "en")
 ```
 
@@ -117,7 +114,8 @@ sotkanet_cite(10012, lang = "en")
 
 Let's now demonstrate the use of the package with two examples. For the first example we will use the GPD data from Nordic countries (Pohjoismaat) for 2000-2010 and draw a time series of the data comparing the countries.
 
-```{r, fig.width = 10, fig.height = 5, out.width = "100%", warning = FALSE}
+
+``` r
 # Get indicator data
 dat <- get_sotkanet(indicators = 10012, years = 2000:2010,
                     genders = "total", lang = "en", region.category = "POHJOISMAAT")
@@ -145,7 +143,8 @@ print(p)
 
 For the second example we will plot the population of Finnish municipalities against a measure of educational level.
 
-```{r, fig.width = 10, fig.height = 5, out.width = "100%", warning = FALSE}
+
+``` r
 # Get the data for the two indicators
 dat <- get_sotkanet(indicators = c(127, 180), 
                     years = 2022, lang = "en",
@@ -190,8 +189,27 @@ Central points:
 
 This work can be freely used, modified and distributed under the [Two-clause BSD license](https://en.wikipedia.org/wiki/BSD_licenses).
 
-```{r citation, message=FALSE, eval=TRUE}
+
+``` r
 citation("sotkanet")
+#> Kindly cite the sotkanet R package as follows:
+#> 
+#>   Leo Lahti, Einari Happonen, Juuso Parkkinen, Joona Lehtomaki, Vesa
+#>   Saaristo, Aleksi Lahtinen and Pyry Kantanen (rOpenGov 2024).
+#>   sotkanet: Sotkanet Open Data Access and Analysis. R package version
+#>   0.10.1 https://github.com/rOpenGov/sotkanet
+#> 
+#> A BibTeX entry for LaTeX users is
+#> 
+#>   @Misc{,
+#>     title = {sotkanet: Sotkanet Open Data Access and Analysis},
+#>     author = {Leo Lahti and Einari Happonen and Joona Lehtomäki and Juuso Parkkinen and Joona Lehtomaki and Vesa Saaristo and Pyry Kantanen and Aleksi Lahtinen},
+#>     url = {https://github.com/rOpenGov/sotkanet},
+#>     year = {2024},
+#>     note = {R package version 0.10.1},
+#>   }
+#> 
+#> Many thanks for all contributors!
 ```
 
 
@@ -203,7 +221,8 @@ You can check the package [GitHub page](https://github.com/rOpenGov/sotkanet/iss
 
 This vignette was created with 
 
-```{r sessioninfo, warning = FALSE}
+
+``` r
 sessionInfo()
 ```
 

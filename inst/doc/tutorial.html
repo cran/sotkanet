@@ -10,9 +10,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<meta name="author" content="Leo Lahti" />
 
-<meta name="date" content="2022-02-01" />
 
 <title>Sotkanet API R tools</title>
 
@@ -29,22 +27,6 @@ document.addEventListener('DOMContentLoaded', function(e) {
   }
 });
 </script>
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
-
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
-  }
-});
-</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -54,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -68,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
@@ -102,7 +86,7 @@ code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code span.at { color: #7d9029; } /* Attribute */
 code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
+code span.bu { color: #008000; } /* BuiltIn */
 code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
 code span.ch { color: #4070a0; } /* Char */
 code span.cn { color: #880000; } /* Constant */
@@ -115,7 +99,7 @@ code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
 code span.fl { color: #40a070; } /* Float */
 code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
+code span.im { color: #008000; font-weight: bold; } /* Import */
 code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 code span.kw { color: #007020; font-weight: bold; } /* Keyword */
 code span.op { color: #666666; } /* Operator */
@@ -136,13 +120,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -347,153 +338,209 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <h1 class="title toc-ignore">Sotkanet API R tools</h1>
-<h4 class="author">Leo Lahti</h4>
-<h4 class="date">2022-02-01</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a>
+<ul>
+<li><a href="#listing-availabe-indicators">Listing availabe
+indicators</a></li>
+<li><a href="#querying-sotkanet-data">Querying Sotkanet data</a></li>
+</ul></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#licensing-and-citations">Licensing and Citations</a>
+<ul>
+<li><a href="#sotkanet-data">Sotkanet data</a></li>
+<li><a href="#sotkanet-r-package">Sotkanet R package</a></li>
+</ul></li>
+<li><a href="#suggestions-and-bug-reports">Suggestions and bug
+reports</a></li>
+<li><a href="#session-info">Session info</a></li>
+</ul>
+</div>
 
-<p>This is the <a href="https://github.com/rOpenGov/sotkanet">sotkanet</a> R package to access data from the <a href="https://sotkanet.fi/sotkanet/en/index">Sotkanet portal</a> that provides over 2000 demographic indicators across Finland and Europe, maintained by the National Institute for Health and Welfare (THL). For more information, see <a href="https://sotkanet.fi/sotkanet/en/tietoa-palvelusta">Information about Sotkanet</a> and <a href="https://sotkanet.fi/sotkanet/en/ohje/74">API description</a>. This package is part of <a href="http://ropengov.org">rOpenGov</a>.</p>
+<p>This <a href="https://github.com/rOpenGov/sotkanet">sotkanet</a> R
+package provides access to data from the <a href="https://sotkanet.fi/sotkanet/en/index">Sotkanet portal</a>. Your
+<a href="https://ropengov.org/community/">contributions</a> and <a href="https://github.com/rOpenGov/sotkanet">bug reports and other
+feedback</a> are welcome.</p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The Sotkanet portal provides over 2000 demographic indicators across
+Finland and Europe. It is maintained by the National Institute for
+Health and Welfare (THL). For more information, see <a href="https://sotkanet.fi/sotkanet/en/tietoa-palvelusta">Information
+about Sotkanet</a> and <a href="https://sotkanet.fi/sotkanet/en/ohje/74">API description</a>.</p>
+<p>The <code>sotkanet</code> R package enables access to the Sotkanet
+API using R facilitating the use of the data from the API. This package
+is part of <a href="https://ropengov.org">rOpenGov</a>.</p>
+</div>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
-<p>Release version from CRAN:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">install.packages</span>(<span class="st">&quot;sotkanet&quot;</span>)</span></code></pre></div>
-<p>Development version from GitHub:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">library</span>(devtools)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="kw">install_github</span>(<span class="st">&quot;ropengov/sotkanet&quot;</span>)</span></code></pre></div>
+<p>To install latest release version from CRAN, use:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;sotkanet&quot;</span>)</span></code></pre></div>
+<p>To install development version from GitHub, use:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(remotes)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;ropengov/sotkanet&quot;</span>)</span></code></pre></div>
+<p>Test the installation by loading the package:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sotkanet)</span></code></pre></div>
 </div>
 <div id="usage" class="section level2">
 <h2>Usage</h2>
-<div id="listing-available-indicators" class="section level3">
-<h3>Listing available indicators</h3>
-<p>Load sotkanet and other libraries used in this vignette</p>
-<p>List available Sotkanet indicators:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="co"># Using a pre-defined list of indicators for a smaller download</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>sotkanet.indicators &lt;-<span class="st"> </span><span class="kw">SotkanetIndicators</span>(<span class="dt">id =</span> <span class="kw">c</span>(<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">46</span>,<span class="dv">74</span>), <span class="dt">type =</span> <span class="st">&quot;table&quot;</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="kw">kable</span>(<span class="kw">head</span>(sotkanet.indicators))</span></code></pre></div>
-<p>List geographical regions with available indicators:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="co"># options(width = 60)</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>sotkanet.regions &lt;-<span class="st"> </span><span class="kw">SotkanetRegions</span>(<span class="dt">type =</span> <span class="st">&quot;table&quot;</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a><span class="kw">kable</span>(<span class="kw">head</span>(sotkanet.regions))</span></code></pre></div>
+<div id="listing-availabe-indicators" class="section level3">
+<h3>Listing availabe indicators</h3>
+<p>Load sotkanet and other packages used in the vignette.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sotkanet)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<p>List available Sotkanet indicators using
+<code>sotkanet_indicators()</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using a preset list of indicators to avoid a large download</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>indicators <span class="ot">&lt;-</span> <span class="fu">sotkanet_indicators</span>(<span class="at">id =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">127</span>, <span class="dv">10012</span>, <span class="dv">10027</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">type =</span> <span class="st">&quot;table&quot;</span>, <span class="at">lang =</span> <span class="st">&quot;en&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(indicators))</span></code></pre></div>
+<p>List geographical regions with available indicators using
+<code>sotkanet_regions()</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List of the first few regions</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>regions <span class="ot">&lt;-</span> <span class="fu">sotkanet_regions</span>(<span class="at">type =</span> <span class="st">&quot;table&quot;</span>, <span class="at">lang =</span> <span class="st">&quot;en&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(regions))</span></code></pre></div>
 </div>
-<div id="querying-sotkanet-indicators" class="section level3">
-<h3>Querying SOTKAnet indicators</h3>
-<p>Get the indicator no. 10013 (Unemployment rate of young people aged 16-24 years) from Sotkanet, from Finland (Suomi) for 1990-2012 (Eurostat employment statistics youth unemployment), and plot a graph:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="co"># Get indicator data</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>dat &lt;-<span class="st"> </span><span class="kw">GetDataSotkanet</span>(<span class="dt">indicators =</span> <span class="dv">10013</span>, <span class="dt">years =</span> <span class="dv">1990</span><span class="op">:</span><span class="dv">2012</span>, </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>                   <span class="dt">genders =</span> <span class="kw">c</span>(<span class="st">&#39;female&#39;</span>, <span class="st">&#39;male&#39;</span>, <span class="st">&#39;total&#39;</span>), </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>               <span class="dt">region.category =</span> <span class="st">&quot;EUROOPPA&quot;</span>, <span class="dt">regions =</span> <span class="st">&quot;Suomi&quot;</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a><span class="co"># Investigate the first lines in the data</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a><span class="kw">kable</span>(<span class="kw">head</span>(dat)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">kable_styling</span>() <span class="op">%&gt;%</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a><span class="st">  </span>kableExtra<span class="op">::</span><span class="kw">scroll_box</span>(<span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>)</span></code></pre></div>
+<div id="querying-sotkanet-data" class="section level3">
+<h3>Querying Sotkanet data</h3>
+<p>To download the data, we need to know the indicator for it. You can
+look for the right indicator using aforementioned
+<code>sotkanet_indicators()</code> or by browsing the <a href="https://sotkanet.fi/sotkanet/en/index">Sotkanet website</a>. For
+example, the indicator no. 10012 responds to the (EU) GPD per capita in
+Purchasing Power Standards (PPS) dataset. The data can be downloaded
+with <code>get_sotkanet()</code> function. If we want, for example, the
+GPD data from Finland for 2000-2010, the function call is:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the indicator data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">get_sotkanet</span>(<span class="at">indicators =</span> <span class="dv">10012</span>, <span class="at">years =</span> <span class="dv">2000</span><span class="sc">:</span><span class="dv">2010</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">genders =</span> <span class="fu">c</span>(<span class="st">&quot;total&quot;</span>), <span class="at">lang =</span> <span class="st">&quot;en&quot;</span>, <span class="at">regions =</span> <span class="st">&quot;Finland&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># The first few lines of the data</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(dat)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">&quot;100%&quot;</span>)</span></code></pre></div>
+<p>The data can also be downloaded by using interactive function
+<code>sotkanet_interactive()</code>. It gives user interactive
+alternative for downloading the dataset. This function can also print
+dataset citation, code for the <code>get_sotkanet()</code> call and
+fixity checksum.</p>
+<p>Dataset citation can be printed for any indicator using the function
+<code>sotkanet_cite()</code>. The citation for the GPD data is:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sotkanet_cite</span>(<span class="dv">10012</span>, <span class="at">lang =</span> <span class="st">&quot;en&quot;</span>)</span></code></pre></div>
 </div>
-<div id="visualization" class="section level3">
-<h3>Visualization</h3>
-<p>Download and visualize time series:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="co"># Pick indicator name</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>indicator.name &lt;-<span class="st"> </span><span class="kw">as.character</span>(<span class="kw">unique</span>(dat<span class="op">$</span>indicator.title.fi))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>indicator.source &lt;-<span class="st"> </span><span class="kw">as.character</span>(<span class="kw">unique</span>(dat<span class="op">$</span>indicator.organization.title.fi))</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a><span class="co"># Visualize</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_bw</span>(<span class="dv">20</span>)); </span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true"></a>p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(dat, <span class="kw">aes</span>(<span class="dt">x =</span> year, <span class="dt">y =</span> primary.value, <span class="dt">group =</span> gender, <span class="dt">color =</span> gender)) </span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true"></a>p &lt;-<span class="st"> </span>p <span class="op">+</span><span class="st"> </span><span class="kw">geom_line</span>() <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="kw">paste</span>(indicator.name, indicator.source, <span class="dt">sep =</span> <span class="st">&quot; / &quot;</span>)) </span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true"></a>p &lt;-<span class="st"> </span>p <span class="op">+</span><span class="st"> </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Year&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Value&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Data source: https://sotkanet.fi&quot;</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true"></a>p &lt;-<span class="st"> </span>p <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">title =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">10</span>))</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true"></a>p &lt;-<span class="st"> </span>p <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">axis.title.x =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">20</span>))</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true"></a>p &lt;-<span class="st"> </span>p <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">20</span>))</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true"></a>p &lt;-<span class="st"> </span>p <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.title =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">15</span>))</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true"></a><span class="kw">print</span>(p)</span></code></pre></div>
-<p>Investigate the effect of municipality size on demographic variation. Smaller municipalities show more random variation as expected by statistical arguments:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a>selected.inds &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">127</span>, <span class="dv">178</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>dat &lt;-<span class="st"> </span><span class="kw">GetDataSotkanet</span>(<span class="dt">indicators =</span> selected.inds, </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a>                <span class="dt">years =</span> <span class="dv">2011</span>, <span class="dt">genders =</span> <span class="kw">c</span>(<span class="st">&#39;total&#39;</span>))</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a><span class="co"># Pick necessary fields and remove duplicates</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a>datf &lt;-<span class="st"> </span>dat[, <span class="kw">c</span>(<span class="st">&quot;region.title.fi&quot;</span>, <span class="st">&quot;indicator.title.fi&quot;</span>, <span class="st">&quot;primary.value&quot;</span>)]</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a>datf &lt;-<span class="st"> </span>datf[<span class="op">!</span><span class="kw">duplicated</span>(datf),]</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a>dw &lt;-<span class="st"> </span><span class="kw">reshape</span>(datf, <span class="dt">idvar =</span> <span class="st">&quot;region.title.fi&quot;</span>, </span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true"></a>                <span class="dt">timevar =</span> <span class="st">&quot;indicator.title.fi&quot;</span>, <span class="dt">direction =</span> <span class="st">&quot;wide&quot;</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true"></a><span class="kw">names</span>(dw) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Municipality&quot;</span>, <span class="st">&quot;Population&quot;</span>, <span class="st">&quot;Migration&quot;</span>)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true"></a>p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(dw, <span class="kw">aes</span>(<span class="dt">x =</span> <span class="kw">log10</span>(Population), <span class="dt">y =</span> Migration)) <span class="op">+</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true"></a><span class="st">       </span><span class="kw">geom_point</span>(<span class="dt">size =</span> <span class="dv">3</span>)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true"></a>       <span class="kw">ggtitle</span>(<span class="st">&quot;Migration vs. population size&quot;</span>) </span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true"></a>       <span class="kw">theme</span>(<span class="dt">title =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">15</span>))</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true"></a>       <span class="kw">theme</span>(<span class="dt">axis.title.x =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">20</span>))</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true"></a>       <span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">20</span>))</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true"></a>       <span class="kw">theme</span>(<span class="dt">legend.title =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">15</span>))</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true"></a><span class="kw">print</span>(p)</span></code></pre></div>
 </div>
-<div id="fetch-all-sotkanet-indicators" class="section level3">
-<h3>Fetch all SOTKAnet indicators</h3>
-<p>This takes for a long time and is not recommended for regular use. Save the data on your local disk for further work.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="co"># These indicators have problems with R routines:</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>problematic.indicators &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1575</span>, <span class="dv">1743</span>, <span class="dv">1826</span>, <span class="dv">1861</span>, <span class="dv">1882</span>, <span class="dv">1924</span>, <span class="dv">1952</span>, <span class="dv">2000</span>, </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>                            <span class="dv">2001</span>, <span class="dv">2033</span>, <span class="dv">2050</span>, <span class="dv">3386</span>, <span class="dv">3443</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a><span class="co"># Get data for all indicators</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>datlist &lt;-<span class="st"> </span><span class="kw">list</span>()</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a><span class="cf">for</span> (ind <span class="cf">in</span> <span class="kw">setdiff</span>(sotkanet.indicators<span class="op">$</span>indicator, problematic.indicators)) {</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true"></a>  datlist[[<span class="kw">as.character</span>(ind)]] &lt;-<span class="st"> </span><span class="kw">GetDataSotkanet</span>(<span class="dt">indicators =</span> ind, </span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true"></a>        <span class="dt">years =</span> <span class="dv">1990</span><span class="op">:</span><span class="dv">2013</span>, <span class="dt">genders =</span> <span class="kw">c</span>(<span class="st">&#39;female&#39;</span>, <span class="st">&#39;male&#39;</span>, <span class="st">&#39;total&#39;</span>))</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true"></a>}</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true"></a><span class="co"># Combine tables (this may require considerable time and memory </span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true"></a><span class="co"># for the full data set)</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true"></a>dat &lt;-<span class="st"> </span><span class="kw">do.call</span>(<span class="st">&quot;rbind&quot;</span>, datlist)</span></code></pre></div>
-</div>
-<div id="further-examples" class="section level3">
-<h3>Further examples</h3>
-<p>For further usage examples, see <a href="http://ropengov.org">rOpenGov-blog</a>, and <a href="https://github.com/louhos/takomo/tree/master/Sotkanet">takomo</a>, and <a href="http://www.hri.fi/fi/ajankohtaista/sotkanet-indikaattoripankki-mukaan-sorvi-tyokalupakkiin/">Helsinki Region Infoshare-blog</a></p>
-</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<p>Let’s now demonstrate the use of the package with two examples. For
+the first example we will use the GPD data from Nordic countries
+(Pohjoismaat) for 2000-2010 and draw a time series of the data comparing
+the countries.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get indicator data</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">get_sotkanet</span>(<span class="at">indicators =</span> <span class="dv">10012</span>, <span class="at">years =</span> <span class="dv">2000</span><span class="sc">:</span><span class="dv">2010</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">genders =</span> <span class="st">&quot;total&quot;</span>, <span class="at">lang =</span> <span class="st">&quot;en&quot;</span>, <span class="at">region.category =</span> <span class="st">&quot;POHJOISMAAT&quot;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>indicator_name <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">unique</span>(dat<span class="sc">$</span>indicator.title))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>indicator_source <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">unique</span>(dat<span class="sc">$</span>indicator.organization.title))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrive metadata</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>dat_meta <span class="ot">&lt;-</span> <span class="fu">sotkanet_indicator_metadata</span>(<span class="at">id =</span> <span class="dv">10012</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(dat, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> primary.value,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">group =</span> region.title, <span class="at">color =</span> region.title)) <span class="sc">+</span> </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(indicator_name, <span class="st">&quot; </span><span class="sc">\n</span><span class="st">&quot;</span>, indicator_source)) <span class="sc">+</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Year&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Value&quot;</span>,<span class="at">caption =</span> <span class="fu">paste0</span>(</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Data source: https://sotkanet.fi/sotkanet&quot;</span>,  <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="st">&quot;Data date: &quot;</span>, dat_meta<span class="sc">$</span><span class="st">`</span><span class="at">data-updated</span><span class="st">`</span>)) <span class="sc">+</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2000</span>,<span class="dv">2010</span>, <span class="at">by =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>)) <span class="sc">+</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>)) <span class="sc">+</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>))</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span></code></pre></div>
+<p>For the second example we will plot the population of Finnish
+municipalities against a measure of educational level.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the data for the two indicators</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">get_sotkanet</span>(<span class="at">indicators =</span> <span class="fu">c</span>(<span class="dv">127</span>, <span class="dv">180</span>), </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">years =</span> <span class="dv">2022</span>, <span class="at">lang =</span> <span class="st">&quot;en&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">genders =</span> <span class="fu">c</span>(<span class="st">&quot;total&quot;</span>), <span class="at">region.category =</span> <span class="fu">c</span>(<span class="st">&quot;KUNTA&quot;</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Pick the fields of interest and remove duplicates</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>datf <span class="ot">&lt;-</span> dat[,<span class="fu">c</span>(<span class="st">&quot;region.title&quot;</span>, <span class="st">&quot;indicator.title&quot;</span>, <span class="st">&quot;primary.value&quot;</span>)]</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>datf <span class="ot">&lt;-</span> datf[<span class="sc">!</span><span class="fu">duplicated</span>(datf),]</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>dw <span class="ot">&lt;-</span> <span class="fu">reshape</span>(datf, <span class="at">idvar =</span> <span class="st">&quot;region.title&quot;</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">timevar =</span> <span class="st">&quot;indicator.title&quot;</span>, <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Municipality&quot;</span>, <span class="st">&quot;Population&quot;</span>, <span class="st">&quot;Education_level&quot;</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Vizualise</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(dw, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(Population), <span class="at">y =</span> Education_level)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Education level vs. population size&quot;</span>) <span class="sc">+</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Education level&quot;</span>, <span class="at">caption =</span> <span class="st">&quot;Data source: https://sotkanet.fi/sotkanet&quot;</span>) <span class="sc">+</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>)) <span class="sc">+</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>)) <span class="sc">+</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>))</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(p)</span></code></pre></div>
 </div>
 <div id="licensing-and-citations" class="section level2">
 <h2>Licensing and Citations</h2>
 <div id="sotkanet-data" class="section level3">
-<h3>SOTKAnet data</h3>
-<p>Cite SOTKAnet and link to <a href="https://sotkanet.fi/sotkanet/fi/index">https://sotkanet.fi/sotkanet/fi/index</a>. Also mention indicator provider.</p>
+<h3>Sotkanet data</h3>
+<p>Cite Sotkanet and link to <a href="https://sotkanet.fi/sotkanet/">https://sotkanet.fi/sotkanet/fi/index</a>.
+Also mention indicator provider.</p>
 <ul>
-<li><a href="https://sotkanet.fi/sotkanet/en/tietoa-palvelusta">Full license and terms of use</a>.</li>
+<li><a href="https://sotkanet.fi/sotkanet/en/tietoa-palvelusta">Full
+license and terms of use</a>.</li>
 </ul>
 <p>Central points:</p>
 <ul>
-<li>SOTKAnet REST API is meant for non-regular data queries. Avoid regular and repeated downloads.</li>
+<li>SOTKAnet REST API is meant for non-regular data queries. Avoid
+regular and repeated downloads.</li>
 <li>SOTKAnet API can be used as the basis for other systems</li>
 <li>Metadata for regions and indicators are under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a></li>
 <li>THL indicators are under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a></li>
-<li>Indicators provided by third parties can be used only by separate agreement!</li>
+<li>Indicators provided by third parties can be used only by separate
+agreement!</li>
 </ul>
 </div>
 <div id="sotkanet-r-package" class="section level3">
-<h3>SOTKAnet R package</h3>
-<p>This work can be freely used, modified and distributed under the <a href="https://en.wikipedia.org/wiki/BSD_licenses">Two-clause BSD license</a>.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="kw">citation</span>(<span class="st">&quot;sotkanet&quot;</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a><span class="co">#&gt; </span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a><span class="co">#&gt; Kindly cite the sotkanet R package as follows:</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a><span class="co">#&gt; </span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a><span class="co">#&gt;   Leo Lahti, Einari Happonen, Juuso Parkkinen, Joona Lehtomaki, Vesa</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a><span class="co">#&gt;   Saaristo and Pyry Kantanen (rOpenGov 2022). sotkanet: Sotkanet Open</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a><span class="co">#&gt;   Data Access and Analysis. R package version 0.9.79</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a><span class="co">#&gt;   https://github.com/rOpenGov/sotkanet</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a><span class="co">#&gt; </span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a><span class="co">#&gt; </span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a><span class="co">#&gt;   @Misc{,</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a><span class="co">#&gt;     title = {sotkanet: Sotkanet Open Data Access and Analysis},</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a><span class="co">#&gt;     author = {Leo Lahti and Einari Happonen and Joona Lehtomäki and Juuso Parkkinen and Joona Lehtomaki and Vesa Saaristo and Pyry Kantanen},</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true"></a><span class="co">#&gt;     url = {https://github.com/rOpenGov/sotkanet},</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true"></a><span class="co">#&gt;     year = {2022},</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true"></a><span class="co">#&gt;     note = {R package version 0.9.79},</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true"></a><span class="co">#&gt;   }</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true"></a><span class="co">#&gt; </span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true"></a><span class="co">#&gt; Many thanks for all contributors!</span></span></code></pre></div>
+<h3>Sotkanet R package</h3>
+<p>This work can be freely used, modified and distributed under the <a href="https://en.wikipedia.org/wiki/BSD_licenses">Two-clause BSD
+license</a>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;sotkanet&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Kindly cite the sotkanet R package as follows:</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Leo Lahti, Einari Happonen, Juuso Parkkinen, Joona Lehtomaki, Vesa</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Saaristo, Aleksi Lahtinen and Pyry Kantanen (rOpenGov 2024).</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   sotkanet: Sotkanet Open Data Access and Analysis. R package version</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   0.10.1 https://github.com/rOpenGov/sotkanet</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   @Misc{,</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     title = {sotkanet: Sotkanet Open Data Access and Analysis},</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     author = {Leo Lahti and Einari Happonen and Joona Lehtomäki and Juuso Parkkinen and Joona Lehtomaki and Vesa Saaristo and Pyry Kantanen and Aleksi Lahtinen},</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     url = {https://github.com/rOpenGov/sotkanet},</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     year = {2024},</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     note = {R package version 0.10.1},</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   }</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Many thanks for all contributors!</span></span></code></pre></div>
 </div>
-<div id="session-info" class="section level3">
-<h3>Session info</h3>
+</div>
+<div id="suggestions-and-bug-reports" class="section level2">
+<h2>Suggestions and bug reports</h2>
+<p>You can check the package <a href="https://github.com/rOpenGov/sotkanet/issues">GitHub page</a> for
+known issues. You can can also use it to report new bugs and to make
+suggestions for improving the package.</p>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session info</h2>
 <p>This vignette was created with</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="kw">sessionInfo</span>()</span></code></pre></div>
-</div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 </div>
 
 
